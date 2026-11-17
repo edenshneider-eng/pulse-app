@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PULSE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Heebo', sans-serif;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #05080f;
+      color: #f8fafc;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* רקע עתידני כהה עם הדגשות אמרלד-טורקיז */
+    .bg-obsidian-mesh {
+      background-color: #060913;
+      background-image:
+        radial-gradient(at 15% 10%, rgba(16, 185, 129, 0.16) 0px, transparent 52%),
+        radial-gradient(at 85% 90%, rgba(20, 184, 166, 0.14) 0px, transparent 52%);
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.52);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    @keyframes wavePulse {
+      0%, 100% { transform: scaleY(0.3); opacity: 0.55; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+    .ai-wave-bar {
+      animation: wavePulse 0.85s ease-in-out infinite;
+    }
+    .ai-wave-bar:nth-child(2) { animation-delay: 0.12s; }
+    .ai-wave-bar:nth-child(3) { animation-delay: 0.24s; }
+    .ai-wave-bar:nth-child(4) { animation-delay: 0.36s; }
+    .ai-wave-bar:nth-child(5) { animation-delay: 0.48s; }
+
+    @keyframes breathGlow {
+      0%, 100% { box-shadow: 0 0 8px rgba(16, 185, 129, 0.55); }
+      50% { box-shadow: 0 0 18px rgba(20, 184, 166, 0.9); }
+    }
+    .ai-armed-dot {
+      animation: breathGlow 2.4s infinite ease-in-out;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="h-[100dvh] w-screen overflow-hidden bg-obsidian-mesh flex items-center justify-center">
+
+  <!-- התראות צפות -->
+  <div id="toastBox" class="fixed top-4 left-1/2 -translate-x-1/2 z-[140] pointer-events-none w-[92%] max-w-sm flex flex-col gap-2"></div>
+
+  <!-- מעטפת האפליקציה הראשית -->
+  <div class="w-full h-full sm:h-[95dvh] sm:max-w-[440px] sm:rounded-[2.25rem] glass-panel sm:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9)] overflow-hidden relative flex flex-col">
+
+    <!-- ===================================================================== -->
+    <!-- מסך 1: כניסה מהירה + שמירת כניסה אוטומטית + כניסה ישירה עם Google     -->
+    <!-- ===================================================================== -->
+    <section id="loginScreen" class="flex-1 flex flex-col justify-between p-6 overflow-y-auto">
+      <div class="mt-4 flex flex-col items-center text-center">
+        <!-- לוגו PULSE מותאם אישית -->
+        <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-emerald-500/20 to-teal-400/20 border border-emerald-400/35 flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.25)] mb-4">
+          <svg class="w-11 h-11 text-emerald-400" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="27" stroke="currentColor" stroke-width="2.5" stroke-opacity="0.35"/>
+            <path d="M10 33H21L26 19L33 45L39 26L43 33H54" stroke="url(#pulseGrad)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="pulseGrad" x1="10" y1="19" x2="54" y2="45" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#34D399"/>
+                <stop offset="1" stop-color="#2DD4BF"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h1 class="text-3xl font-black tracking-tight bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300 bg-clip-text text-transparent">
+          PULSE
+        </h1>
+        <p class="text-xs text-slate-400 mt-1.5 max-w-xs">
+          תקשורת חכמה בזמן אמת • מענה קולי AI אוטומטי • קבוצות ומשחקים
+        </p>
+      </div>
+
+      <div class="space-y-4 my-auto py-4">
+        <!-- כפתור כניסה ישירה עם Google -->
+        <button
+          id="directGoogleLoginBtn"
+          type="button"
+          class="w-full py-3.5 px-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm flex items-center justify-center gap-3 shadow-lg transition active:scale-[0.98]"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          <span>המשך עם Google</span>
+        </button>
+
+        <div class="flex items-center gap-3 text-[11px] text-slate-500">
+          <div class="h-px flex-1 bg-white/10"></div>
+          <span>או כניסה עם מספר טלפון</span>
+          <div class="h-px flex-1 bg-white/10"></div>
+        </div>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">שם תצוגה</label>
+            <input
+              id="loginNameInput"
+              type="text"
+              placeholder="איך יראו אותך בצ'אט?"
+              class="w-full bg-slate-900/85 border border-white/10 focus:border-emerald-400/60 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">מספר טלפון</label>
+            <div class="flex items-center gap-2" dir="ltr">
+              <span class="px-3.5 py-3 rounded-2xl bg-slate-900/90 border border-white/10 text-xs font-bold text-emerald-300">
+                +972
+              </span>
+              <input
+                id="loginPhoneInput"
+                type="tel"
+                inputmode="tel"
+                placeholder="050-0000000"
+                class="flex-1 bg-slate-900/85 border border-white/10 focus:border-emerald-400/60 rounded-2xl px-4 py-3 text-sm text-white text-left focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <button
+            id="phoneLoginBtn"
+            type="button"
+            class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 transition active:scale-[0.98]"
+          >
+            כניסה ל-PULSE
+          </button>
+        </div>
+      </div>
+
+      <p class="text-[11px] text-center text-slate-500">
+        הפרטים נשמרים אוטומטית במכשיר לכניסה מיידית בפעם הבאה
+      </p>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- מסך 2: מסך ראשי (צ'אטים, קבוצות, סטטוסים, גישה לג'ימייל וחיבור ענן)   -->
+    <!-- ===================================================================== -->
+    <section id="homeScreen" class="hidden flex-1 flex flex-col overflow-hidden">
+      <!-- סרגל עליון -->
+      <header class="px-4 pt-4 pb-3 border-b border-white/10 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 font-black text-base flex items-center justify-center shrink-0">
+            P
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <h2 class="text-base font-black tracking-tight text-white">PULSE</h2>
+              <span id="cloudStatusDot" title="מצב סנכרון" class="w-2 h-2 rounded-full bg-emerald-400 ai-armed-dot"></span>
+            </div>
+            <p id="headerUserSubtitle" class="text-[11px] text-slate-400 truncate"></p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <!-- כפתור גישה ישירה לג'ימייל / חיבור גוגל -->
+          <button
+            id="topGoogleGmailBtn"
+            type="button"
+            title="גישה ישירה לג'ימייל / חיבור Google"
+            class="px-2.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-200 flex items-center gap-1.5 transition"
+          >
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            <span id="topGoogleBtnLabel">Gmail</span>
+          </button>
+
+          <!-- כפתור הגדרות ענן ופרופיל -->
+          <button
+            id="openSettingsBtn"
+            type="button"
+            title="הגדרות ענן ופרופיל"
+            class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition"
+          >
+            ⚙️
+          </button>
+        </div>
+      </header>
+
+      <!-- באנר חשבון גוגל מחובר לגישה ישירה -->
+      <div id="googleConnectedBar" class="hidden px-4 py-2 bg-emerald-500/10 border-b border-emerald-400/20 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+          <span id="connectedGoogleEmailLabel" dir="ltr" class="text-emerald-200 font-semibold truncate"></span>
+        </div>
+        <a
+          href="https://mail.google.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 font-extrabold text-[11px] shrink-0 hover:bg-emerald-400 transition"
+        >
+          פתח Gmail ↗
+        </a>
+      </div>
+
+      <!-- לשוניות ניווט: צ'אטים / סטטוסים -->
+      <div class="px-4 pt-3 pb-2 flex items-center gap-2">
+        <button
+          id="tabChatsBtn"
+          type="button"
+          class="flex-1 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-extrabold transition"
+        >
+          צ'אטים וקבוצות
+        </button>
+        <button
+          id="tabStatusesBtn"
+          type="button"
+          class="flex-1 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-bold transition"
+        >
+          סטטוסים
+        </button>
+      </div>
+
+      <!-- תוכן לשונית צ'אטים -->
+      <div id="chatsTabContainer" class="flex-1 overflow-y-auto px-4 py-2 space-y-2 relative">
+        <div id="emptyChatsState" class="h-full flex flex-col items-center justify-center text-center px-6 py-10">
+          <div class="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl mb-3">
+            💬
+          </div>
+          <h3 class="text-sm font-extrabold text-white">אין עדיין שיחות</h3>
+          <p class="text-xs text-slate-400 mt-1 max-w-[240px]">
+            לחץ על כפתור ה-<span class="text-emerald-300 font-bold">+</span> למטה כדי להתחיל שיחה אישית לפי מספר טלפון או לפתוח קבוצה.
+          </p>
+        </div>
+
+        <div id="chatListContainer" class="space-y-2 pb-20"></div>
+      </div>
+
+      <!-- תוכן לשונית סטטוסים -->
+      <div id="statusesTabContainer" class="hidden flex-1 overflow-y-auto px-4 py-2 space-y-3 pb-20">
+        <div class="glass-card rounded-2xl p-3.5 space-y-2.5">
+          <p class="text-xs font-bold text-emerald-300">פרסם סטטוס חדש</p>
+          <div class="flex items-center gap-2">
+            <input
+              id="statusTextInput"
+              type="text"
+              placeholder="מה חדש אצלך עכשיו?"
+              class="flex-1 bg-slate-900/90 border border-white/10 focus:border-emerald-400/60 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none"
+            />
+            <button
+              id="publishStatusBtn"
+              type="button"
+              class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-extrabold text-xs shrink-0"
+            >
+              פרסם
+            </button>
+          </div>
+        </div>
+
+        <div id="statusesListContainer" class="space-y-2.5"></div>
+      </div>
+
+      <!-- כפתור צף + לפתיחת שיחה חדשה או קבוצה -->
+      <button
+        id="openNewChatModalBtn"
+        type="button"
+        title="שיחה חדשה או קבוצה"
+        class="absolute bottom-5 left-5 w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 font-black text-2xl shadow-[0_10px_30px_rgba(16,185,129,0.45)] flex items-center justify-center hover:scale-105 active:scale-95 transition z-20"
+      >
+        +
+      </button>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- מסך 3: חלון שיחה (אישית / קבוצתית + משחקים + מדיה + Voice AI)        -->
+    <!-- ===================================================================== -->
+    <section id="chatScreen" class="hidden flex-1 flex flex-col overflow-hidden">
+      <!-- כותרת שיחה -->
+      <header class="px-3.5 py-3 border-b border-white/10 flex items-center justify-between gap-2 bg-slate-950/50">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <button
+            id="backToHomeBtn"
+            type="button"
+            class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-sm font-bold shrink-0"
+          >
+            →
+          </button>
+          <div id="activeChatAvatar" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-slate-950 font-black text-sm flex items-center justify-center shrink-0">
+            P
+          </div>
+          <div class="min-w-0">
+            <h3 id="activeChatTitle" class="text-sm font-extrabold text-white truncate"></h3>
+            <p id="activeChatSubtitle" class="text-[11px] text-slate-400 truncate"></p>
+          </div>
+        </div>
+
+        <!-- כפתורי פעולה בצ'אט: Voice AI, שיחה קולית, שיחת וידאו, משחקים -->
+        <div class="flex items-center gap-1 shrink-0">
+          <button
+            id="toggleAutoVoiceBtn"
+            type="button"
+            title="מצב Voice AI אוטומטי (15 שניות)"
+            class="px-2 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[11px] font-extrabold transition"
+          >
+            AI 🔊
+          </button>
+          <button
+            id="toggleGamesBarBtn"
+            type="button"
+            title="משחקים מועדפים לצ'אט (עד 3)"
+            class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs transition"
+          >
+            🎮
+          </button>
+          <button
+            id="startVoiceCallBtn"
+            type="button"
+            title="שיחה קולית"
+            class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs transition"
+          >
+            📞
+          </button>
+          <button
+            id="startVideoCallBtn"
+            type="button"
+            title="שיחת וידאו"
+            class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs transition"
+          >
+            📹
+          </button>
+        </div>
+      </header>
+
+      <!-- סרגל משחקים מועדפים לצ'אט (מקסימום 3 משחקים) -->
+      <div id="chatGamesDrawer" class="hidden px-3.5 py-2.5 bg-slate-900/90 border-b border-white/10 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-teal-300">משחקים מועדפים בצ'אט (עד 3)</span>
+          <button
+            id="openAddGameModalBtn"
+            type="button"
+            class="px-2.5 py-1 rounded-lg bg-teal-500/20 border border-teal-400/40 text-teal-200 text-[11px] font-bold"
+          >
+            + הוסף משחק
+          </button>
+        </div>
+        <div id="chatGamesSlots" class="flex items-center gap-2 overflow-x-auto pb-0.5"></div>
+      </div>
+
+      <!-- אזור הודעות -->
+      <div id="messagesContainer" class="flex-1 overflow-y-auto px-3.5 py-3 space-y-2.5"></div>
+
+      <!-- מגירת סטיקרים -->
+      <div id="stickerPickerPanel" class="hidden px-3.5 py-2.5 bg-slate-900/95 border-t border-white/10 grid grid-cols-4 gap-2"></div>
+
+      <!-- סרגל הקלדה ומדיה -->
+      <footer class="p-2.5 border-t border-white/10 bg-slate-950/75 flex items-center gap-1.5">
+        <button
+          id="toggleStickersBtn"
+          type="button"
+          title="סטיקרים"
+          class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-base shrink-0"
+        >
+          😊
+        </button>
+
+        <button
+          id="openVideoRecorderBtn"
+          type="button"
+          title="צילום סרטון"
+          class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-base shrink-0"
+        >
+          🎥
+        </button>
+
+        <input
+          id="messageTextInput"
+          type="text"
+          placeholder="הודעה או קישור..."
+          class="flex-1 min-w-0 bg-slate-900/90 border border-white/10 focus:border-emerald-400/60 rounded-2xl px-3.5 py-2.5 text-xs text-white focus:outline-none"
+        />
+
+        <button
+          id="recordVoiceMsgBtn"
+          type="button"
+          title="הקלטת הודעה קולית"
+          class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-base shrink-0 transition"
+        >
+          🎙️
+        </button>
+
+        <button
+          id="sendTextMsgBtn"
+          type="button"
+          class="px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-extrabold text-xs shrink-0 active:scale-95 transition"
+        >
+          שלח
+        </button>
+      </footer>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- מודל 1: יצירת שיחה אישית חדשה או קבוצה                                -->
+    <!-- ===================================================================== -->
+    <div id="newChatModal" class="hidden absolute inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-5">
+      <div class="w-full glass-panel rounded-3xl p-5 border border-emerald-400/20 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-extrabold text-white">שיחה חדשה</h3>
+          <button id="closeNewChatModalBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2">✕</button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="modeDmBtn" type="button" class="flex-1 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-extrabold">
+            שיחה אישית
+          </button>
+          <button id="modeGroupBtn" type="button" class="flex-1 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-bold">
+            קבוצה חדשה
+          </button>
+        </div>
+
+        <!-- טופס שיחה אישית -->
+        <div id="dmFormFields" class="space-y-3">
+          <input
+            id="newContactNameInput"
+            type="text"
+            placeholder="שם איש הקשר"
+            class="w-full bg-slate-900/90 border border-white/10 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none"
+          />
+          <input
+            id="newContactPhoneInput"
+            type="tel"
+            dir="ltr"
+            placeholder="050-0000000"
+            class="w-full bg-slate-900/90 border border-white/10 rounded-2xl px-4 py-3 text-xs text-white text-left focus:outline-none"
+          />
+          <button
+            id="createDmSubmitBtn"
+            type="button"
+            class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 text-xs font-extrabold"
+          >
+            התחל שיחה
+          </button>
+        </div>
+
+        <!-- טופס קבוצה -->
+        <div id="groupFormFields" class="hidden space-y-3">
+          <input
+            id="newGroupNameInput"
+            type="text"
+            placeholder="שם הקבוצה"
+            class="w-full bg-slate-900/90 border border-white/10 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none"
+          />
+          <textarea
+            id="newGroupMembersInput"
+            rows="3"
+            dir="ltr"
+            placeholder="הזן מספרי טלפון מופרדים בפסיק: 0501111111, 0522222222"
+            class="w-full bg-slate-900/90 border border-white/10 rounded-2xl px-4 py-2.5 text-xs text-white text-left focus:outline-none"
+          ></textarea>
+          <button
+            id="createGroupSubmitBtn"
+            type="button"
+            class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 text-xs font-extrabold"
+          >
+            צור קבוצה
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- מודל 2: כניסה ישירה לחשבון Google (ללא קודים ידניים)                 -->
+    <!-- ===================================================================== -->
+    <div id="googleConnectModal" class="hidden absolute inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-5">
+      <div class="w-full glass-panel rounded-3xl p-5 border border-white/15 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            <h3 class="text-base font-extrabold text-white">חיבור ישיר עם Google</h3>
+          </div>
+          <button id="closeGoogleModalBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2">✕</button>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+          הזן את כתובת ה-Gmail שלך לכניסה ישירה וליצירת קיצור דרך קבוע לתיבת הדואר מתוך PULSE:
+        </p>
+
+        <input
+          id="googleEmailInput"
+          type="email"
+          dir="ltr"
+          placeholder="yourname@gmail.com"
+          class="w-full bg-slate-900/90 border border-white/10 focus:border-emerald-400/60 rounded-2xl px-4 py-3 text-sm text-white text-left focus:outline-none"
+        />
+
+        <input
+          id="googleDisplayNameInput"
+          type="text"
+          placeholder="שם מלא (אופציונלי)"
+          class="w-full bg-slate-900/90 border border-white/10 focus:border-emerald-400/60 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none"
+        />
+
+        <button
+          id="confirmGoogleLoginBtn"
+          type="button"
+          class="w-full py-3 rounded-2xl bg-white hover:bg-slate-100 text-slate-950 text-xs font-extrabold transition"
+        >
+          אשר והתחבר עם Google
+        </button>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- מודל 3: הוספת משחק מועדף לצ'אט (מקסימום 3 משחקים)                     -->
+    <!-- ===================================================================== -->
+    <div id="addGameModal" class="hidden absolute inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-5">
+      <div class="w-full glass-panel rounded-3xl p-5 border border-teal-400/25 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-extrabold text-white">הוסף משחק לצ'אט (עד 3)</h3>
+          <button id="closeAddGameModalBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2">✕</button>
+        </div>
+
+        <div class="space-y-2">
+          <p class="text-[11px] text-slate-400">בחירה מהירה ממשחקים פופולריים:</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" class="preset-game-btn p-2.5 rounded-xl bg-white/5 hover:bg-teal-500/20 border border-white/10 text-xs font-bold text-right" data-name="Brawl Stars" data-url="intent://#Intent;package=com.supercell.brawlstars;end">
+              ⚡ Brawl Stars
+            </button>
+            <button type="button" class="preset-game-btn p-2.5 rounded-xl bg-white/5 hover:bg-teal-500/20 border border-white/10 text-xs font-bold text-right" data-name="Roblox" data-url="intent://#Intent;package=com.roblox.client;end">
+              🎲 Roblox
+            </button>
+            <button type="button" class="preset-game-btn p-2.5 rounded-xl bg-white/5 hover:bg-teal-500/20 border border-white/10 text-xs font-bold text-right" data-name="Clash Royale" data-url="intent://#Intent;package=com.supercell.clashroyale;end">
+              👑 Clash Royale
+            </button>
+            <button type="button" class="preset-game-btn p-2.5 rounded-xl bg-white/5 hover:bg-teal-500/20 border border-white/10 text-xs font-bold text-right" data-name="Subway Surfers" data-url="intent://#Intent;package=com.kiloo.subwaysurf;end">
+              🏃 Subway Surfers
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-2.5 pt-1 border-t border-white/10">
+          <input
+            id="customGameNameInput"
+            type="text"
+            placeholder="או הקלד שם משחק מהטלפון..."
+            class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none"
+          />
+          <input
+            id="customGameUrlInput"
+            type="text"
+            dir="ltr"
+            placeholder="קישור הפעלה / חבילה (אופציונלי)"
+            class="w-full bg-slate-900/90 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white text-left focus:outline-none"
+          />
+          <button
+            id="saveCustomGameBtn"
+            type="button"
+            class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 text-xs font-extrabold"
+          >
+            הוסף משחק מועדף
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- מודל 4: צילום סרטון ושליחה לצ'אט                                      -->
+    <!-- ===================================================================== -->
+    <div id="videoRecorderModal" class="hidden absolute inset-0 z-50 bg-slate-950/92 backdrop-blur-md flex flex-col items-center justify-between p-5">
+      <div class="w-full flex items-center justify-between">
+        <h3 class="text-sm font-extrabold text-white">צילום סרטון לצ'אט</h3>
+        <button id="closeVideoRecorderBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2">✕</button>
+      </div>
+
+      <div class="w-full max-w-xs aspect-[3/4] rounded-3xl overflow-hidden bg-slate-900 border border-white/15 relative flex items-center justify-center">
+        <video id="videoCapturePreview" autoplay playsinline muted class="w-full h-full object-cover"></video>
+        <span id="videoRecTimerBadge" class="hidden absolute top-3 right-3 px-2.5 py-1 rounded-full bg-rose-600 text-white text-[11px] font-mono font-bold animate-pulse">
+          ● REC 00:00
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3 w-full max-w-xs">
+        <button
+          id="startStopVideoRecBtn"
+          type="button"
+          class="flex-1 py-3 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white text-xs font-extrabold transition"
+        >
+          התחל צילום
+        </button>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- מודל 5: הגדרות סנכרון ענן (Firebase) וניהול חשבון                     -->
+    <!-- ===================================================================== -->
+    <div id="settingsModal" class="hidden absolute inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-5">
+      <div class="w-full glass-panel rounded-3xl p-5 border border-white/15 space-y-4 max-h-[88dvh] overflow-y-auto">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-extrabold text-white">הגדרות וחיבור ענן</h3>
+          <button id="closeSettingsModalBtn" type="button" class="text-slate-400 hover:text-white font-bold px-2">✕</button>
+        </div>
+
+        <div class="glass-card rounded-2xl p-3.5 space-y-2">
+          <p class="text-xs font-extrabold text-emerald-300">חיבור לרשת בין טלפונים (Firebase URL)</p>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            כדי שטלפונים נפרדים ידברו בזמן אמת דרך האינטרנט, הדבק כאן כתובת Firebase Realtime Database (למשל: <code dir="ltr" class="text-teal-300">https://your-app.firebaseio.com</code>). ללא כתובת, הסנכרון פועל בין לשוניות באותו מכשיר.
+          </p>
+          <input
+            id="firebaseDbUrlInput"
+            type="url"
+            dir="ltr"
+            placeholder="https://your-project-default-rtdb.firebaseio.com"
+            class="w-full bg-slate-950/90 border border-white/10 rounded-xl px-3 py-2 text-xs text-white text-left focus:outline-none font-mono"
+          />
+          <button
+            id="saveFirebaseUrlBtn"
+            type="button"
+            class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-xs font-extrabold"
+          >
+            שמור והפעל סנכרון ענן
+          </button>
+        </div>
+
+        <button
+          id="logoutBtn"
+          type="button"
+          class="w-full py-3 rounded-2xl bg-rose-500/15 border border-rose-400/30 text-rose-300 text-xs font-bold"
+        >
+          התנתק מהחשבון במכשיר זה
+        </button>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- שכבת שיחה קולית / שיחת וידאו (אישית או קבוצתית)                      -->
+    <!-- ===================================================================== -->
+    <div id="callOverlay" class="hidden absolute inset-0 z-[60] bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-between p-6 text-center">
+      <div class="mt-3">
+        <span id="callModeBadge" class="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-xs font-bold">
+          שיחה קולית
+        </span>
+        <h3 id="callPeerName" class="text-2xl font-extrabold text-white mt-3"></h3>
+        <span id="callDuration" dir="ltr" class="text-xs font-mono text-slate-400 mt-1 block">00:00</span>
+      </div>
+
+      <div class="relative w-56 h-56 rounded-3xl overflow-hidden glass-card border border-white/15 flex items-center justify-center my-auto">
+        <video id="localCallVideo" autoplay playsinline muted class="hidden w-full h-full object-cover"></video>
+        <div id="callAvatarPulse" class="w-24 h-24 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 text-slate-950 font-black text-3xl flex items-center justify-center animate-pulse">
+          P
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 mb-4">
+        <button
+          id="toggleMuteCallBtn"
+          type="button"
+          class="px-5 py-3 rounded-full bg-white/10 text-white text-xs font-bold"
+        >
+          השתק 🔇
+        </button>
+        <button
+          id="hangupCallBtn"
+          type="button"
+          class="px-7 py-3 rounded-full bg-rose-500 hover:bg-rose-400 text-white text-xs font-extrabold shadow-lg shadow-rose-500/30"
+        >
+          נתק שיחה
+        </button>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- שכבת HUD אוטומטית של ה-Voice AI (הקראה + האזנה ל-15 שניות)        -->
+    <!-- ===================================================================== -->
+    <div id="autoAiHudOverlay" class="hidden absolute inset-0 z-[70] bg-slate-950/94 backdrop-blur-xl flex flex-col items-center justify-between p-6 text-center">
+      <div class="mt-3">
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-xs font-bold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>PULSE AI • מענה קולי אוטומטי</span>
+        </span>
+        <h3 id="hudSenderTitle" class="text-lg font-extrabold text-white mt-3"></h3>
+        <p id="hudIncomingText" class="text-xs text-slate-300 mt-2 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 max-w-xs mx-auto"></p>
+      </div>
+
+      <div class="my-auto flex flex-col items-center">
+        <div class="w-28 h-28 rounded-full bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border-2 border-emerald-400/60 flex flex-col items-center justify-center shadow-[0_0_50px_rgba(16,185,129,0.3)]">
+          <span id="hudCountdownNum" class="text-4xl font-black text-white">🔊</span>
+          <span id="hudCountdownSub" class="text-[10px] text-emerald-300 font-semibold mt-0.5">מקריא</span>
+        </div>
+
+        <p id="hudStatusText" class="text-sm font-bold text-white mt-4">מקריא את ההודעה...</p>
+
+        <div class="flex items-center justify-center gap-1.5 h-6 mt-2.5">
+          <div class="w-1.5 h-5 bg-emerald-400 rounded-full ai-wave-bar"></div>
+          <div class="w-1.5 h-6 bg-teal-400 rounded-full ai-wave-bar"></div>
+          <div class="w-1.5 h-4 bg-emerald-400 rounded-full ai-wave-bar"></div>
+          <div class="w-1.5 h-6 bg-teal-400 rounded-full ai-wave-bar"></div>
+          <div class="w-1.5 h-5 bg-emerald-400 rounded-full ai-wave-bar"></div>
+        </div>
+
+        <div class="mt-4 w-full max-w-xs bg-slate-900/90 border border-white/10 rounded-2xl p-3">
+          <p id="hudLiveTranscript" class="text-xs text-emerald-200 min-h-[2.2rem] flex items-center justify-center">
+            ממתין לדיבור שלך...
+          </p>
+        </div>
+      </div>
+
+      <button
+        id="hudCancelBtn"
+        type="button"
+        class="mb-2 px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/15 text-xs font-semibold text-slate-300"
+      >
+        ביטול מענה
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- לוגיקת האפליקציה המלאה                                                 -->
+  <!-- ===================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      const STICKERS = [
+        { emoji: '🔥', label: 'אש' },
+        { emoji: '❤️', label: 'לב' },
+        { emoji: '😂', label: 'צוחק' },
+        { emoji: '👍', label: 'מעולה' },
+        { emoji: '🚀', label: 'טסים' },
+        { emoji: '⚡', label: 'אנרגיה' },
+        { emoji: '😎', label: 'קול' },
+        { emoji: '🙏', label: 'תודה' }
+      ];
+
+      const SESSION_KEY = 'pulse_user_session_v3';
+      const CHATS_KEY_PREFIX = 'pulse_chats_v3_';
+      const STATUSES_KEY = 'pulse_statuses_v3';
+      const FIREBASE_URL_KEY = 'pulse_firebase_url_v3';
+      const PACKET_KEY = 'pulse_last_packet_v3';
+
+      const state = {
+        myPhone: '',
+        myName: '',
+        googleEmail: '',
+        chats: [], // מתחיל ריק לחלוטין ללא אנשי קשר פיקטיביים
+        statuses: [],
+        activeChatId: null,
+        activeTab: 'chats',
+        autoVoiceEnabled: true,
+        aiRunning: false,
+        aiTimer: null,
+        aiSeconds: 15,
+        recognition: null,
+        transcriptBuffer: '',
+        firebaseUrl: '',
+        cloudPollTimer: null,
+        callTimer: null,
+        callSeconds: 0,
+        callStream: null,
+        isMuted: false,
+        voiceRecorder: null,
+        voiceChunks: [],
+        isRecordingVoice: false,
+        videoStream: null,
+        videoRecorder: null,
+        videoChunks: [],
+        videoRecTimer: null,
+        videoRecSeconds: 0
+      };
+
+      const processedMsgIds = new Set();
+      let bc = null;
+      try {
+        if ('BroadcastChannel' in window) {
+          bc = new BroadcastChannel('pulse_realtime_bus_v3');
+        }
+      } catch (e) {}
+
+      // ---------------------------------------------------------------------
+      // עזרי מערכת
+      // ---------------------------------------------------------------------
+      function showToast(msg) {
+        const box = document.getElementById('toastBox');
+        if (!box) return;
+        const el = document.createElement('div');
+        el.className = 'px-4 py-2.5 rounded-2xl bg-slate-900/95 border border-emerald-400/35 text-xs font-bold text-white shadow-xl text-center transition-opacity duration-300';
+        el.textContent = msg;
+        box.appendChild(el);
+        setTimeout(() => {
+          el.style.opacity = '0';
+          setTimeout(() => el.remove(), 300);
+        }, 2800);
+      }
+
+      function normPhone(p) {
+        return String(p || '').replace(/\D/g, '').replace(/^972/, '0');
+      }
+
+      function nowTime() {
+        const d = new Date();
+        return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      // זיהוי קישורים לחיצים בתוך טקסט
+      function linkifyText(rawText) {
+        const safe = escapeHtml(rawText);
+        const urlRegex = /(https?:\/\/[^\s<]+)/g;
+        return safe.replace(urlRegex, (url) => {
+          return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="underline text-cyan-300 hover:text-cyan-200 break-all font-semibold">${url}</a>`;
+        });
+      }
+
+      // ---------------------------------------------------------------------
+      // שמירת כניסה ונתונים (LocalStorage)
+      // ---------------------------------------------------------------------
+      function saveSession() {
+        try {
+          localStorage.setItem(SESSION_KEY, JSON.stringify({
+            myPhone: state.myPhone,
+            myName: state.myName,
+            googleEmail: state.googleEmail
+          }));
+        } catch (e) {}
+      }
+
+      function saveChats() {
+        if (!state.myPhone) return;
+        try {
+          localStorage.setItem(CHATS_KEY_PREFIX + normPhone(state.myPhone), JSON.stringify(state.chats));
+        } catch (e) {}
+      }
+
+      function loadChats() {
+        if (!state.myPhone) return;
+        try {
+          const raw = localStorage.getItem(CHATS_KEY_PREFIX + normPhone(state.myPhone));
+          state.chats = raw ? JSON.parse(raw) : [];
+          state.chats.forEach(c => {
+            (c.messages || []).forEach(m => { if (m.id) processedMsgIds.add(m.id); });
+          });
+        } catch (e) {
+          state.chats = [];
+        }
+      }
+
+      function saveStatuses() {
+        try {
+          localStorage.setItem(STATUSES_KEY, JSON.stringify(state.statuses));
+        } catch (e) {}
+      }
+
+      function loadStatuses() {
+        try {
+          const raw = localStorage.getItem(STATUSES_KEY);
+          state.statuses = raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          state.statuses = [];
+        }
+      }
+
+      // ---------------------------------------------------------------------
+      // ניווט בין מסכים וניהול כניסה (טלפון + כניסה ישירה עם Google)
+      // ---------------------------------------------------------------------
+      function enterApp() {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('chatScreen').classList.add('hidden');
+        document.getElementById('homeScreen').classList.remove('hidden');
+
+        const sub = state.googleEmail
+          ? `${state.myName} • ${state.googleEmail}`
+          : `${state.myName} • ${state.myPhone}`;
+        document.getElementById('headerUserSubtitle').textContent = sub;
+
+        updateGoogleUi();
+        loadChats();
+        loadStatuses();
+        renderChatList();
+        renderStatuses();
+        startCloudPollingIfConfigured();
+      }
+
+      function updateGoogleUi() {
+        const bar = document.getElementById('googleConnectedBar');
+        const label = document.getElementById('connectedGoogleEmailLabel');
+        const topBtnLabel = document.getElementById('topGoogleBtnLabel');
+
+        if (state.googleEmail) {
+          bar.classList.remove('hidden');
+          label.textContent = state.googleEmail;
+          topBtnLabel.textContent = 'Gmail ↗';
+        } else {
+          bar.classList.add('hidden');
+          topBtnLabel.textContent = 'התחבר ל-Google';
+        }
+      }
+
+      // כניסה עם טלפון
+      document.getElementById('phoneLoginBtn').addEventListener('click', () => {
+        const nameVal = document.getElementById('loginNameInput').value.trim();
+        const phoneVal = document.getElementById('loginPhoneInput').value.trim();
+        if (!nameVal || !phoneVal) {
+          showToast('נא להזין שם ומספר טלפון');
+          return;
+        }
+        state.myName = nameVal;
+        state.myPhone = phoneVal;
+        saveSession();
+        enterApp();
+      });
+
+      // כפתור כניסה ישירה עם Google במסך הכניסה
+      document.getElementById('directGoogleLoginBtn').addEventListener('click', () => {
+        document.getElementById('googleEmailInput').value = state.googleEmail || '';
+        document.getElementById('googleDisplayNameInput').value = state.myName || '';
+        document.getElementById('googleConnectModal').classList.remove('hidden');
+      });
+
+      // כפתור Google/Gmail בסרגל העליון
+      document.getElementById('topGoogleGmailBtn').addEventListener('click', () => {
+        if (state.googleEmail) {
+          window.open('https://mail.google.com', '_blank', 'noopener,noreferrer');
+        } else {
+          document.getElementById('googleEmailInput').value = '';
+          document.getElementById('googleDisplayNameInput').value = state.myName || '';
+          document.getElementById('googleConnectModal').classList.remove('hidden');
+        }
+      });
+
+      document.getElementById('closeGoogleModalBtn').addEventListener('click', () => {
+        document.getElementById('googleConnectModal').classList.add('hidden');
+      });
+
+      document.getElementById('confirmGoogleLoginBtn').addEventListener('click', () => {
+        const email = document.getElementById('googleEmailInput').value.trim();
+        const customName = document.getElementById('googleDisplayNameInput').value.trim();
+
+        if (!email || !email.includes('@')) {
+          showToast('נא להזין כתובת Google / Gmail תקינה');
+          return;
+        }
+
+        state.googleEmail = email;
+        if (!state.myName) {
+          state.myName = customName || email.split('@')[0];
+        } else if (customName) {
+          state.myName = customName;
+        }
+        if (!state.myPhone) {
+          // מזהה ייחודי מבוסס חשבון גוגל אם לא הוזן טלפון
+          state.myPhone = 'g_' + email.toLowerCase();
+        }
+
+        saveSession();
+        document.getElementById('googleConnectModal').classList.add('hidden');
+        enterApp();
+        showToast('התחברת בהצלחה עם Google');
+      });
+
+      // ---------------------------------------------------------------------
+      // לשוניות צ'אטים וסטטוסים
+      // ---------------------------------------------------------------------
+      document.getElementById('tabChatsBtn').addEventListener('click', () => {
+        state.activeTab = 'chats';
+        document.getElementById('chatsTabContainer').classList.remove('hidden');
+        document.getElementById('statusesTabContainer').classList.add('hidden');
+        document.getElementById('tabChatsBtn').className = 'flex-1 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-extrabold transition';
+        document.getElementById('tabStatusesBtn').className = 'flex-1 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-bold transition';
+      });
+
+      document.getElementById('tabStatusesBtn').addEventListener('click', () => {
+        state.activeTab = 'statuses';
+        document.getElementById('chatsTabContainer').classList.add('hidden');
+        document.getElementById('statusesTabContainer').classList.remove('hidden');
+        document.getElementById('tabStatusesBtn').className = 'flex-1 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-extrabold transition';
+        document.getElementById('tabChatsBtn').className = 'flex-1 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-bold transition';
+        renderStatuses();
+      });
+
+      document.getElementById('publishStatusBtn').addEventListener('click', () => {
+        const input = document.getElementById('statusTextInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const statusObj = {
+          id: 'st_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          authorName: state.myName,
+          authorPhone: state.myPhone,
+          text: text,
+          time: nowTime()
+        };
+
+        state.statuses.unshift(statusObj);
+        saveStatuses();
+        input.value = '';
+        renderStatuses();
+        broadcastPacket({ kind: 'status', status: statusObj });
+        showToast('הסטטוס פורסם');
+      });
+
+      function renderStatuses() {
+        const container = document.getElementById('statusesListContainer');
+        if (!state.statuses.length) {
+          container.innerHTML = '<p class="text-xs text-slate-500 text-center py-8">אין עדיין סטטוסים להצגה</p>';
+          return;
+        }
+        container.innerHTML = state.statuses.map(s => `
+          <div class="glass-card rounded-2xl p-3.5 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-emerald-300">${escapeHtml(s.authorName)}</span>
+              <span class="text-[10px] text-slate-400">${escapeHtml(s.time)}</span>
+            </div>
+            <p class="text-xs text-white leading-relaxed">${linkifyText(s.text)}</p>
+          </div>
+        `).join('');
+      }
+
+      // ---------------------------------------------------------------------
+      // יצירת צ'אט אישי או קבוצה
+      // ---------------------------------------------------------------------
+      document.getElementById('openNewChatModalBtn').addEventListener('click', () => {
+        document.getElementById('newChatModal').classList.remove('hidden');
+      });
+
+      document.getElementById('closeNewChatModalBtn').addEventListener('click', () => {
+        document.getElementById('newChatModal').classList.add('hidden');
+      });
+
+      document.getElementById('modeDmBtn').addEventListener('click', () => {
+        document.getElementById('dmFormFields').classList.remove('hidden');
+        document.getElementById('groupFormFields').classList.add('hidden');
+        document.getElementById('modeDmBtn').className = 'flex-1 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-extrabold';
+        document.getElementById('modeGroupBtn').className = 'flex-1 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-bold';
+      });
+
+      document.getElementById('modeGroupBtn').addEventListener('click', () => {
+        document.getElementById('dmFormFields').classList.add('hidden');
+        document.getElementById('groupFormFields').classList.remove('hidden');
+        document.getElementById('modeGroupBtn').className = 'flex-1 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-extrabold';
+        document.getElementById('modeDmBtn').className = 'flex-1 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs font-bold';
+      });
+
+      document.getElementById('createDmSubmitBtn').addEventListener('click', () => {
+        const name = document.getElementById('newContactNameInput').value.trim();
+        const phone = document.getElementById('newContactPhoneInput').value.trim();
+        if (!name || !phone) {
+          showToast('נא להזין שם ומספר טלפון');
+          return;
+        }
+
+        const existing = state.chats.find(c => !c.isGroup && normPhone(c.phone) === normPhone(phone));
+        if (existing) {
+          document.getElementById('newChatModal').classList.add('hidden');
+          openChat(existing.id);
+          return;
+        }
+
+        const newChat = {
+          id: 'dm_' + normPhone(phone) + '_' + Date.now(),
+          isGroup: false,
+          name: name,
+          phone: phone,
+          games: [],
+          unread: 0,
+          messages: []
+        };
+
+        state.chats.unshift(newChat);
+        saveChats();
+        renderChatList();
+        document.getElementById('newContactNameInput').value = '';
+        document.getElementById('newContactPhoneInput').value = '';
+        document.getElementById('newChatModal').classList.add('hidden');
+        openChat(newChat.id);
+      });
+
+      document.getElementById('createGroupSubmitBtn').addEventListener('click', () => {
+        const groupName = document.getElementById('newGroupNameInput').value.trim();
+        const rawMembers = document.getElementById('newGroupMembersInput').value.trim();
+        if (!groupName || !rawMembers) {
+          showToast('נא להזין שם קבוצה ולפחות מספר טלפון אחד');
+          return;
+        }
+
+        const members = rawMembers.split(',').map(s => s.trim()).filter(Boolean);
+        if (!members.includes(state.myPhone)) {
+          members.push(state.myPhone);
+        }
+
+        const newGroup = {
+          id: 'grp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+          isGroup: true,
+          name: groupName,
+          phone: '',
+          members: members,
+          games: [],
+          unread: 0,
+          messages: []
+        };
+
+        state.chats.unshift(newGroup);
+        saveChats();
+        renderChatList();
+        document.getElementById('newGroupNameInput').value = '';
+        document.getElementById('newGroupMembersInput').value = '';
+        document.getElementById('newChatModal').classList.add('hidden');
+        openChat(newGroup.id);
+      });
+
+      // ---------------------------------------------------------------------
+      // רינדור רשימת שיחות ופתיחת חלון צ'אט
+      // ---------------------------------------------------------------------
+      function renderChatList() {
+        const emptyEl = document.getElementById('emptyChatsState');
+        const listEl = document.getElementById('chatListContainer');
+
+        if (!state.chats.length) {
+          emptyEl.classList.remove('hidden');
+          listEl.innerHTML = '';
+          return;
+        }
+
+        emptyEl.classList.add('hidden');
+        listEl.innerHTML = state.chats.map(chat => {
+          const lastMsg = chat.messages && chat.messages.length ? chat.messages[chat.messages.length - 1] : null;
+          let preview = chat.isGroup ? `${chat.members.length} משתתפים` : chat.phone;
+          if (lastMsg) {
+            if (lastMsg.type === 'sticker') preview = `סטיקר ${lastMsg.sticker}`;
+            else if (lastMsg.type === 'voice') preview = '🎙️ הודעה קולית';
+            else if (lastMsg.type === 'video') preview = '🎥 סרטון';
+            else preview = lastMsg.text;
+          }
+
+          return `
+            <button
+              type="button"
+              data-chat-id="${chat.id}"
+              class="chat-row-item w-full glass-card hover:bg-slate-800/70 rounded-2xl p-3.5 flex items-center justify-between gap-3 text-right transition"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr ${chat.isGroup ? 'from-teal-500 to-cyan-400' : 'from-emerald-500 to-teal-500'} text-slate-950 font-black text-base flex items-center justify-center shrink-0">
+                  ${chat.isGroup ? '👥' : escapeHtml(chat.name.charAt(0).toUpperCase())}
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <h4 class="text-sm font-extrabold text-white truncate">${escapeHtml(chat.name)}</h4>
+                    ${chat.isGroup ? '<span class="px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[9px] font-bold">קבוצה</span>' : ''}
+                  </div>
+                  <p class="text-xs text-slate-400 truncate mt-0.5">${escapeHtml(preview)}</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-end gap-1 shrink-0">
+                <span class="text-[10px] text-slate-500">${lastMsg ? escapeHtml(lastMsg.time) : ''}</span>
+                ${chat.unread > 0 ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black">${chat.unread}</span>` : ''}
+              </div>
+            </button>
+          `;
+        }).join('');
+
+        listEl.querySelectorAll('.chat-row-item').forEach(btn => {
+          btn.addEventListener('click', () => openChat(btn.getAttribute('data-chat-id')));
+        });
+      }
+
+      function openChat(chatId) {
+        const chat = state.chats.find(c => c.id === chatId);
+        if (!chat) return;
+
+        state.activeChatId = chatId;
+        chat.unread = 0;
+        saveChats();
+
+        document.getElementById('homeScreen').classList.add('hidden');
+        document.getElementById('chatScreen').classList.remove('hidden');
+
+        document.getElementById('activeChatAvatar').textContent = chat.isGroup ? '👥' : chat.name.charAt(0).toUpperCase();
+        document.getElementById('activeChatTitle').textContent = chat.name;
+        document.getElementById('activeChatSubtitle').textContent = chat.isGroup
+          ? `קבוצה • ${chat.members.length} משתתפים`
+          : chat.phone;
+
+        renderChatGames();
+        renderMessages();
+      }
+
+      document.getElementById('backToHomeBtn').addEventListener('click', () => {
+        state.activeChatId = null;
+        document.getElementById('chatScreen').classList.add('hidden');
+        document.getElementById('homeScreen').classList.remove('hidden');
+        renderChatList();
+      });
+
+      // ---------------------------------------------------------------------
+      // רשימת משחקים מועדפים לצ'אט (מקסימום 3 משחקים לכל צ'אט)
+      // ---------------------------------------------------------------------
+      document.getElementById('toggleGamesBarBtn').addEventListener('click', () => {
+        document.getElementById('chatGamesDrawer').classList.toggle('hidden');
+      });
+
+      document.getElementById('openAddGameModalBtn').addEventListener('click', () => {
+        const chat = state.chats.find(c => c.id === state.activeChatId);
+        if (!chat) return;
+        if ((chat.games || []).length >= 3) {
+          showToast('הגעת למגבלה של 3 משחקים מועדפים בצ\'אט זה');
+          return;
+        }
+        document.getElementById('customGameNameInput').value = '';
+        document.getElementById('customGameUrlInput').value = '';
+        document.getElementById('addGameModal').classList.remove('hidden');
+      });
+
+      document.getElementById('closeAddGameModalBtn').addEventListener('click', () => {
+        document.getElementById('addGameModal').classList.add('hidden');
+      });
+
+      function addFavoriteGameToActiveChat(name, url) {
+        const chat = state.chats.find(c => c.id === state.activeChatId);
+        if (!chat) return;
+        if (!chat.games) chat.games = [];
+        if (chat.games.length >= 3) {
+          showToast('ניתן להוסיף עד 3 משחקים בלבד לצ\'אט');
+          return;
+        }
+        chat.games.push({
+          id: 'gm_' + Date.now(),
+          name: name,
+          url: url || ''
+        });
+        saveChats();
+        renderChatGames();
+        document.getElementById('addGameModal').classList.add('hidden');
+        showToast(`המשחק ${name} נוסף לצ'אט`);
+      }
+
+      document.querySelectorAll('.preset-game-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          addFavoriteGameToActiveChat(btn.getAttribute('data-name'), btn.getAttribute('data-url'));
+        });
+      });
+
+      document.getElementById('saveCustomGameBtn').addEventListener('click', () => {
+        const name = document.getElementById('customGameNameInput').value.trim();
+        const url = document.getElementById('customGameUrlInput').value.trim();
+        if (!name) {
+          showToast('נא להזין שם משחק');
+          return;
+        }
+        addFavoriteGameToActiveChat(name, url);
+      });
+
+      function renderChatGames() {
+        const chat = state.chats.find(c => c.id === state.activeChatId);
+        const container = document.getElementById('chatGamesSlots');
+        if (!chat || !container) return;
+
+        const games = chat.games || [];
+        if (!games.length) {
+          container.innerHTML = '<span class="text-[11px] text-slate-400">לא נבחרו משחקים מועדפים לצ\'אט זה (0/3)</span>';
+          return;
+        }
+
+        container.innerHTML = games.map(g => `
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-500/15 border border-teal-400/35 shrink-0">
+            <button type="button" class="launch-game-btn text-xs font-bold text-teal-200 hover:text-white" data-url="${escapeHtml(g.url)}" data-name="${escapeHtml(g.name)}">
+              🎮 ${escapeHtml(g.name)}
+            </button>
+            <button type="button" class="remove-game-btn text-[10px] text-rose-300 hover:text-rose-200 px-1" data-game-id="${g.id}">✕</button>
+          </div>
+        `).join('');
+
+        container.querySelectorAll('.launch-game-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const url = btn.getAttribute('data-url');
+            const name = btn.getAttribute('data-name');
+            if (url) {
+              window.location.href = url;
+            } else {
+              window.open(`https://play.google.com/store/search?q=${encodeURIComponent(name)}&c=apps`, '_blank', 'noopener,noreferrer');
+            }
+          });
+        });
+
+        container.querySelectorAll('.remove-game-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const gid = btn.getAttribute('data-game-id');
+            chat.games = (chat.games || []).filter(item => item.id !== gid);
+            saveChats();
+            renderChatGames();
+          });
+        });
+      }
+
+      // ---------------------------------------------------------------------
+      // שליחת הודעות, סטיקרים, הקלטת קול וצילום וידאו
+      // ---------------------------------------------------------------------
+      function pushMessage(chatId, msgObj, shouldBroadcast = true) {
+        const chat = state.chats.find(c => c.id === chatId);
+        if (!chat) return;
+
+        const fullMsg = {
+          id: msgObj.id || ('msg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6)),
+          sender: msgObj.sender || 'me',
+          senderName: msgObj.senderName || state.myName,
+          type: msgObj.type || 'text',
+          text: msgObj.text || '',
+          sticker: msgObj.sticker || '',
+          mediaUrl: msgObj.mediaUrl || '',
+          viaAi: Boolean(msgObj.viaAi),
+          time: msgObj.time || nowTime()
+        };
+
+        processedMsgIds.add(fullMsg.id);
+        if (!chat.messages) chat.messages = [];
+        chat.messages.push(fullMsg);
+
+        if (state.activeChatId !== chatId && fullMsg.sender === 'them') {
+          chat.unread = (chat.unread || 0) + 1;
+        }
+
+        saveChats();
+
+        if (state.activeChatId === chatId) {
+          renderMessages();
+        } else {
+          renderChatList();
+        }
+
+        if (shouldBroadcast && fullMsg.sender === 'me') {
+          broadcastPacket({
+            kind: 'message',
+            msgId: fullMsg.id,
+            fromPhone: state.myPhone,
+            fromName: state.myName,
+            toPhone: chat.phone || '',
+            isGroup: Boolean(chat.isGroup),
+            groupName: chat.isGroup ? chat.name : '',
+            members: chat.members || [],
+            type: fullMsg.type,
+            text: fullMsg.text,
+            sticker: fullMsg.sticker,
+            mediaUrl: fullMsg.mediaUrl,
+            time: fullMsg.time
+          });
+        }
+      }
+
+      function renderMessages() {
+        const chat = state.chats.find(c => c.id === state.activeChatId);
+        const box = document.getElementById('messagesContainer');
+        if (!chat || !box) return;
+
+        if (!chat.messages || !chat.messages.length) {
+          box.innerHTML = '<div class="h-full flex items-center justify-center text-xs text-slate-500">שלח הודעה ראשונה כדי להתחיל</div>';
+          return;
+        }
+
+        box.innerHTML = chat.messages.map(m => {
+          const isMe = m.sender === 'me';
+          let bodyHtml = '';
+
+          if (m.type === 'sticker') {
+            bodyHtml = `<div class="text-4xl py-1">${escapeHtml(m.sticker)}</div>`;
+          } else if (m.type === 'voice' && m.mediaUrl) {
+            bodyHtml = `<audio controls src="${m.mediaUrl}" class="h-8 max-w-[210px]"></audio>`;
+          } else if (m.type === 'video' && m.mediaUrl) {
+            bodyHtml = `<video controls playsinline src="${m.mediaUrl}" class="rounded-xl max-h-48 max-w-[220px]"></video>`;
+          } else {
+            bodyHtml = `<p class="text-xs leading-relaxed break-words">${linkifyText(m.text)}</p>`;
+          }
+
+          return `
+            <div class="flex flex-col ${isMe ? 'items-start' : 'items-end'}">
+              <div class="max-w-[82%] rounded-2xl px-3.5 py-2.5 ${isMe ? 'bg-gradient-to-tr from-emerald-600/90 to-teal-600/90 text-white rounded-tr-sm' : 'glass-card text-slate-100 rounded-tl-sm'}">
+                ${!isMe && chat.isGroup ? `<span class="block text-[10px] font-bold text-teal-300 mb-0.5">${escapeHtml(m.senderName)}</span>` : ''}
+                ${bodyHtml}
+                <div class="flex items-center justify-end gap-1.5 mt-1 opacity-75 text-[9px]">
+                  ${m.viaAi ? '<span>AI 🔊</span>' : ''}
+                  <span>${escapeHtml(m.time)}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        box.scrollTop = box.scrollHeight;
+      }
+
+      document.getElementById('sendTextMsgBtn').addEventListener('click', () => {
+        const input = document.getElementById('messageTextInput');
+        const val = input.value.trim();
+        if (!val || !state.activeChatId) return;
+        pushMessage(state.activeChatId, { sender: 'me', type: 'text', text: val });
+        input.value = '';
+      });
+
+      document.getElementById('messageTextInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.getElementById('sendTextMsgBtn').click();
+        }
+      });
+
+      // סטיקרים
+      const stickerPanel = document.getElementById('stickerPickerPanel');
+      stickerPanel.innerHTML = STICKERS.map(s => `
+        <button type="button" class="sticker-choice-btn py-2 rounded-xl bg-white/5 hover:bg-white/10 text-2xl transition" data-emoji="${s.emoji}">
+          ${s.emoji}
+        </button>
+      `).join('');
+
+      document.getElementById('toggleStickersBtn').addEventListener('click', () => {
+        stickerPanel.classList.toggle('hidden');
+      });
+
+      stickerPanel.querySelectorAll('.sticker-choice-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!state.activeChatId) return;
+          pushMessage(state.activeChatId, {
+            sender: 'me',
+            type: 'sticker',
+            sticker: btn.getAttribute('data-emoji')
+          });
+          stickerPanel.classList.add('hidden');
+        });
+      });
+
+      // הקלטת הודעה קולית אמיתית
+      document.getElementById('recordVoiceMsgBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('recordVoiceMsgBtn');
+        if (!state.activeChatId) return;
+
+        if (state.isRecordingVoice && state.voiceRecorder) {
+          state.voiceRecorder.stop();
+          state.isRecordingVoice = false;
+          btn.classList.remove('bg-rose-500', 'text-white');
+          return;
+        }
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          state.voiceChunks = [];
+          state.voiceRecorder = new MediaRecorder(stream);
+          state.voiceRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) state.voiceChunks.push(e.data);
+          };
+          state.voiceRecorder.onstop = () => {
+            stream.getTracks().forEach(t => t.stop());
+            const blob = new Blob(state.voiceChunks, { type: 'audio/webm' });
+            const url = URL.createObjectURL(blob);
+            pushMessage(state.activeChatId, {
+              sender: 'me',
+              type: 'voice',
+              mediaUrl: url
+            });
+          };
+          state.voiceRecorder.start();
+          state.isRecordingVoice = true;
+          btn.classList.add('bg-rose-500', 'text-white');
+          showToast('מקליט הודעה קולית... לחץ שוב לשליחה');
+        } catch (err) {
+          showToast('לא ניתן לגשת למיקרופון');
+        }
+      });
+
+      // צילום סרטון ושליחה לצ'אט
+      document.getElementById('openVideoRecorderBtn').addEventListener('click', async () => {
+        if (!state.activeChatId) return;
+        try {
+          state.videoStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          const preview = document.getElementById('videoCapturePreview');
+          preview.srcObject = state.videoStream;
+          document.getElementById('videoRecorderModal').classList.remove('hidden');
+        } catch (err) {
+          showToast('לא ניתן לפתוח מצלמה');
+        }
+      });
+
+      function closeVideoModalAndCleanup() {
+        clearInterval(state.videoRecTimer);
+        if (state.videoRecorder && state.videoRecorder.state === 'recording') {
+          state.videoRecorder.stop();
+        }
+        if (state.videoStream) {
+          state.videoStream.getTracks().forEach(t => t.stop());
+          state.videoStream = null;
+        }
+        document.getElementById('videoRecTimerBadge').classList.add('hidden');
+        document.getElementById('startStopVideoRecBtn').textContent = 'התחל צילום';
+        document.getElementById('videoRecorderModal').classList.add('hidden');
+      }
+
+      document.getElementById('closeVideoRecorderBtn').addEventListener('click', closeVideoModalAndCleanup);
+
+      document.getElementById('startStopVideoRecBtn').addEventListener('click', () => {
+        const btn = document.getElementById('startStopVideoRecBtn');
+        const badge = document.getElementById('videoRecTimerBadge');
+
+        if (state.videoRecorder && state.videoRecorder.state === 'recording') {
+          state.videoRecorder.stop();
+          return;
+        }
+
+        if (!state.videoStream) return;
+        state.videoChunks = [];
+        state.videoRecorder = new MediaRecorder(state.videoStream);
+        state.videoRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) state.videoChunks.push(e.data);
+        };
+        state.videoRecorder.onstop = () => {
+          const blob = new Blob(state.videoChunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const targetId = state.activeChatId;
+          closeVideoModalAndCleanup();
+          if (targetId) {
+            pushMessage(targetId, {
+              sender: 'me',
+              type: 'video',
+              mediaUrl: url
+            });
+            showToast('הסרטון נשלח לצ\'אט');
+          }
+        };
+
+        state.videoRecorder.start();
+        state.videoRecSeconds = 0;
+        badge.classList.remove('hidden');
+        btn.textContent = 'עצור ושלח סרטון';
+        state.videoRecTimer = setInterval(() => {
+          state.videoRecSeconds++;
+          badge.textContent = '● REC 00:' + String(state.videoRecSeconds).padStart(2, '0');
+        }, 1000);
+      });
+
+      // ---------------------------------------------------------------------
+      // שיחות קוליות ושיחות וידאו (אישיות וקבוצתיות)
+      // ---------------------------------------------------------------------
+      async function startCall(isVideo) {
+        const chat = state.chats.find(c => c.id === state.activeChatId);
+        if (!chat) return;
+
+        document.getElementById('callModeBadge').textContent =
+          (isVideo ? 'שיחת וידאו' : 'שיחה קולית') + (chat.isGroup ? ' קבוצתית' : '');
+        document.getElementById('callPeerName').textContent = chat.name;
+        document.getElementById('callDuration').textContent = '00:00';
+        document.getElementById('callOverlay').classList.remove('hidden');
+
+        const videoEl = document.getElementById('localCallVideo');
+        const pulseEl = document.getElementById('callAvatarPulse');
+        pulseEl.textContent = chat.isGroup ? '👥' : chat.name.charAt(0).toUpperCase();
+
+        try {
+          state.callStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
+          if (isVideo) {
+            videoEl.srcObject = state.callStream;
+            videoEl.classList.remove('hidden');
+            pulseEl.classList.add('hidden');
+          } else {
+            videoEl.classList.add('hidden');
+            pulseEl.classList.remove('hidden');
+          }
+        } catch (err) {
+          videoEl.classList.add('hidden');
+          pulseEl.classList.remove('hidden');
+        }
+
+        state.callSeconds = 0;
+        clearInterval(state.callTimer);
+        state.callTimer = setInterval(() => {
+          state.callSeconds++;
+          const mins = String(Math.floor(state.callSeconds / 60)).padStart(2, '0');
+          const secs = String(state.callSeconds % 60).padStart(2, '0');
+          document.getElementById('callDuration').textContent = `${mins}:${secs}`;
+        }, 1000);
+      }
+
+      document.getElementById('startVoiceCallBtn').addEventListener('click', () => startCall(false));
+      document.getElementById('startVideoCallBtn').addEventListener('click', () => startCall(true));
+
+      document.getElementById('toggleMuteCallBtn').addEventListener('click', () => {
+        state.isMuted = !state.isMuted;
+        if (state.callStream) {
+          state.callStream.getAudioTracks().forEach(t => { t.enabled = !state.isMuted; });
+        }
+        document.getElementById('toggleMuteCallBtn').textContent = state.isMuted ? 'בטל השתקה 🔊' : 'השתק 🔇';
+      });
+
+      document.getElementById('hangupCallBtn').addEventListener('click', () => {
+        clearInterval(state.callTimer);
+        if (state.callStream) {
+          state.callStream.getTracks().forEach(t => t.stop());
+          state.callStream = null;
+        }
+        state.isMuted = false;
+        document.getElementById('callOverlay').classList.add('hidden');
+      });
+
+      // ---------------------------------------------------------------------
+      // מנוע סנכרון בזמן אמת (רב-לשוניות + Firebase Cloud URL)
+      // ---------------------------------------------------------------------
+      async function broadcastPacket(packet) {
+        if (bc) {
+          try { bc.postMessage(packet); } catch (e) {}
+        }
+        try {
+          localStorage.setItem(PACKET_KEY, JSON.stringify(packet));
+        } catch (e) {}
+
+        if (state.firebaseUrl) {
+          try {
+            const cleanUrl = state.firebaseUrl.replace(/\/+$/, '');
+            await fetch(`${cleanUrl}/pulse_packets.json`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(packet)
+            });
+          } catch (e) {}
+        }
+      }
+
+      function startCloudPollingIfConfigured() {
+        clearInterval(state.cloudPollTimer);
+        const dot = document.getElementById('cloudStatusDot');
+        if (!state.firebaseUrl) {
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400 ai-armed-dot';
+          return;
+        }
+        dot.className = 'w-2 h-2 rounded-full bg-cyan-400 ai-armed-dot';
+        const cleanUrl = state.firebaseUrl.replace(/\/+$/, '');
+        state.cloudPollTimer = setInterval(async () => {
+          try {
+            const res = await fetch(`${cleanUrl}/pulse_packets.json?orderBy="$key"&limitToLast=20`);
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data && typeof data === 'object') {
+              Object.values(data).forEach(pkt => handleIncomingPacket(pkt));
+            }
+          } catch (e) {}
+        }, 2500);
+      }
+
+      function handleIncomingPacket(packet) {
+        if (!packet) return;
+
+        if (packet.kind === 'status' && packet.status) {
+          if (!state.statuses.some(s => s.id === packet.status.id)) {
+            state.statuses.unshift(packet.status);
+            saveStatuses();
+            if (state.activeTab === 'statuses') renderStatuses();
+          }
+          return;
+        }
+
+        if (!packet.msgId || processedMsgIds.has(packet.msgId)) return;
+        if (!state.myPhone) return;
+
+        const myNorm = normPhone(state.myPhone);
+        const isDirectToMe = normPhone(packet.toPhone) === myNorm;
+        const isGroupMember = packet.isGroup && Array.isArray(packet.members) &&
+          packet.members.some(m => normPhone(m) === myNorm);
+
+        if (!isDirectToMe && !isGroupMember) return;
+        if (normPhone(packet.fromPhone) === myNorm) return;
+
+        processedMsgIds.add(packet.msgId);
+
+        let targetChat;
+        if (packet.isGroup) {
+          targetChat = state.chats.find(c => c.isGroup && c.name === packet.groupName);
+          if (!targetChat) {
+            targetChat = {
+              id: 'grp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+              isGroup: true,
+              name: packet.groupName || 'קבוצה',
+              phone: '',
+              members: packet.members || [],
+              games: [],
+              unread: 0,
+              messages: []
+            };
+            state.chats.unshift(targetChat);
+          }
+        } else {
+          const senderNorm = normPhone(packet.fromPhone);
+          targetChat = state.chats.find(c => !c.isGroup && normPhone(c.phone) === senderNorm);
+          if (!targetChat) {
+            targetChat = {
+              id: 'dm_' + senderNorm + '_' + Date.now(),
+              isGroup: false,
+              name: packet.fromName || packet.fromPhone,
+              phone: packet.fromPhone,
+              games: [],
+              unread: 0,
+              messages: []
+            };
+            state.chats.unshift(targetChat);
+          }
+        }
+
+        pushMessage(targetChat.id, {
+          id: packet.msgId,
+          sender: 'them',
+          senderName: packet.fromName || packet.fromPhone,
+          type: packet.type || 'text',
+          text: packet.text || '',
+          sticker: packet.sticker || '',
+          mediaUrl: packet.mediaUrl || '',
+          time: packet.time || nowTime()
+        }, false);
+
+        // הפעלת מנוע Voice AI אוטומטי כשנכנסת הודעה
+        if (state.autoVoiceEnabled && !state.aiRunning && packet.type === 'text' && packet.text) {
+          runAutomaticVoiceAi(targetChat, packet.fromName || targetChat.name, packet.text);
+        }
+      }
+
+      if (bc) bc.onmessage = (e) => handleIncomingPacket(e.data);
+      window.addEventListener('storage', (e) => {
+        if (e.key === PACKET_KEY && e.newValue) {
+          try { handleIncomingPacket(JSON.parse(e.newValue)); } catch (err) {}
+        } else if (e.key === STATUSES_KEY) {
+          loadStatuses();
+          if (state.activeTab === 'statuses') renderStatuses();
+        }
+      });
+
+      // ---------------------------------------------------------------------
+      // מנוע Voice AI אוטומטי (הקראה + 15 שניות האזנה ושליחה חוזרת)
+      // ---------------------------------------------------------------------
+      document.getElementById('toggleAutoVoiceBtn').addEventListener('click', () => {
+        state.autoVoiceEnabled = !state.autoVoiceEnabled;
+        const btn = document.getElementById('toggleAutoVoiceBtn');
+        if (state.autoVoiceEnabled) {
+          btn.className = 'px-2 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[11px] font-extrabold transition';
+          showToast('מענה קולי AI אוטומטי הופעל');
+        } else {
+          btn.className = 'px-2 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-[11px] font-bold transition';
+          showToast('מענה קולי AI הושהה');
+        }
+      });
+
+      function runAutomaticVoiceAi(targetChat, senderLabel, incomingText) {
+        state.aiRunning = true;
+        state.transcriptBuffer = '';
+
+        const hud = document.getElementById('autoAiHudOverlay');
+        document.getElementById('hudSenderTitle').textContent = `הודעה מ-${senderLabel}`;
+        document.getElementById('hudIncomingText').textContent = incomingText;
+        document.getElementById('hudCountdownNum').textContent = '🔊';
+        document.getElementById('hudCountdownSub').textContent = 'מקריא';
+        document.getElementById('hudStatusText').textContent = 'מקריא את ההודעה בקול...';
+        document.getElementById('hudLiveTranscript').textContent = 'מיד ייפתח מיקרופון ל-15 שניות...';
+        hud.classList.remove('hidden');
+
+        speakAloud(`הודעה חדשה מ${senderLabel}: ${incomingText}`, () => {
+          if (state.aiRunning) {
+            listenFor15SecondsAndReply(targetChat);
+          }
+        });
+      }
+
+      function speakAloud(text, onDone) {
+        if (!('speechSynthesis' in window)) {
+          setTimeout(onDone, 2000);
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'he-IL';
+        u.rate = 1.05;
+        const heVoice = window.speechSynthesis.getVoices().find(v => v.lang.includes('he') || v.lang.includes('iw'));
+        if (heVoice) u.voice = heVoice;
+
+        let finished = false;
+        const done = () => {
+          if (!finished) {
+            finished = true;
+            onDone();
+          }
+        };
+        u.onend = done;
+        u.onerror = done;
+        window.speechSynthesis.speak(u);
+        setTimeout(done, Math.min(Math.max(text.length * 90, 2400), 8000));
+      }
+
+      function listenFor15SecondsAndReply(targetChat) {
+        state.aiSeconds = 15;
+        const numEl = document.getElementById('hudCountdownNum');
+        const subEl = document.getElementById('hudCountdownSub');
+        const statusEl = document.getElementById('hudStatusText');
+        const transcriptEl = document.getElementById('hudLiveTranscript');
+
+        numEl.textContent = '15';
+        subEl.textContent = 'שניות';
+        statusEl.textContent = 'דבר כעת — התשובה תישלח אוטומטית';
+        transcriptEl.textContent = 'מאזין...';
+
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SR) {
+          try {
+            state.recognition = new SR();
+            state.recognition.lang = 'he-IL';
+            state.recognition.continuous = true;
+            state.recognition.interimResults = true;
+
+            let finalStr = '';
+            state.recognition.onresult = (ev) => {
+              let interimStr = '';
+              for (let i = ev.resultIndex; i < ev.results.length; i++) {
+                if (ev.results[i].isFinal) {
+                  finalStr += ev.results[i][0].transcript + ' ';
+                } else {
+                  interimStr += ev.results[i][0].transcript;
+                }
+              }
+              state.transcriptBuffer = (finalStr + interimStr).trim();
+              if (state.transcriptBuffer) {
+                transcriptEl.textContent = state.transcriptBuffer;
+              }
+            };
+            state.recognition.start();
+          } catch (e) {}
+        }
+
+        clearInterval(state.aiTimer);
+        state.aiTimer = setInterval(() => {
+          state.aiSeconds--;
+          numEl.textContent = String(state.aiSeconds);
+          if (state.aiSeconds <= 0) {
+            clearInterval(state.aiTimer);
+            completeAndSendVoiceReply(targetChat);
+          }
+        }, 1000);
+      }
+
+      function completeAndSendVoiceReply(targetChat) {
+        if (!state.aiRunning) return;
+        const spokenText = state.transcriptBuffer.trim();
+        stopAutomaticVoiceAi();
+
+        if (spokenText) {
+          pushMessage(targetChat.id, {
+            sender: 'me',
+            type: 'text',
+            text: spokenText,
+            viaAi: true
+          });
+          speakAloud('נשלח.', () => {});
+          showToast(`נשלח אל ${targetChat.name}`);
+        } else {
+          showToast('לא נקלט דיבור — לא נשלחה הודעה');
+        }
+      }
+
+      function stopAutomaticVoiceAi() {
+        state.aiRunning = false;
+        clearInterval(state.aiTimer);
+        if (state.recognition) {
+          try { state.recognition.stop(); } catch (e) {}
+          state.recognition = null;
+        }
+        document.getElementById('autoAiHudOverlay').classList.add('hidden');
+      }
+
+      document.getElementById('hudCancelBtn').addEventListener('click', () => {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        stopAutomaticVoiceAi();
+      });
+
+      // ---------------------------------------------------------------------
+      // הגדרות ענן והתנתקות
+      // ---------------------------------------------------------------------
+      document.getElementById('openSettingsBtn').addEventListener('click', () => {
+        document.getElementById('firebaseDbUrlInput').value = state.firebaseUrl || '';
+        document.getElementById('settingsModal').classList.remove('hidden');
+      });
+
+      document.getElementById('closeSettingsModalBtn').addEventListener('click', () => {
+        document.getElementById('settingsModal').classList.add('hidden');
+      });
+
+      document.getElementById('saveFirebaseUrlBtn').addEventListener('click', () => {
+        const url = document.getElementById('firebaseDbUrlInput').value.trim();
+        state.firebaseUrl = url;
+        try {
+          localStorage.setItem(FIREBASE_URL_KEY, url);
+        } catch (e) {}
+        startCloudPollingIfConfigured();
+        document.getElementById('settingsModal').classList.add('hidden');
+        showToast(url ? 'סנכרון ענן בזמן אמת הופעל' : 'עבר לסנכרון מקומי');
+      });
+
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        try {
+          localStorage.removeItem(SESSION_KEY);
+        } catch (e) {}
+        state.myPhone = '';
+        state.myName = '';
+        state.googleEmail = '';
+        document.getElementById('settingsModal').classList.add('hidden');
+        document.getElementById('homeScreen').classList.add('hidden');
+        document.getElementById('loginScreen').classList.remove('hidden');
+      });
+
+      // ---------------------------------------------------------------------
+      // אתחול אוטומטי בטעינת העמוד (שמירת כניסה אוטומטית)
+      // ---------------------------------------------------------------------
+      (function initApp() {
+        try {
+          state.firebaseUrl = localStorage.getItem(FIREBASE_URL_KEY) || '';
+          const savedRaw = localStorage.getItem(SESSION_KEY);
+          if (savedRaw) {
+            const saved = JSON.parse(savedRaw);
+            if (saved && saved.myPhone && saved.myName) {
+              state.myPhone = saved.myPhone;
+              state.myName = saved.myName;
+              state.googleEmail = saved.googleEmail || '';
+              enterApp();
+            }
+          }
+        } catch (e) {}
+      })();
+    })();
+  </script>
+</body>
+</html>
